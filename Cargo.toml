@@ -1,0 +1,16 @@
+[package]
+name = "rust-scrap-israel-nutri"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+flate2 = "1.0.30"
+headless_chrome = "1.0.10"
+quick-xml = { version = "0.34.0", features = ["serialize"] }
+reqwest = { version = "0.12.5", features = ["json"] }
+scraper = "0.19.0"
+serde = { version = "1.0.203", features = ["derive"] }
+serde-aux = "4.5.0"
+serde_json = "1.0.118"
+tokio = { version = "1.38.0", features = ["full"] }
+zip = "2.1.3"
