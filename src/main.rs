@@ -1,6 +1,5 @@
 
 
-mod parsed_sites;
 
 use std::error::Error;
 
@@ -8,8 +7,6 @@ use rust_scrap_israel_nutri::{maayan_2000::Maayan2000, LINK_KING_STORE};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // TODO: preper directories
-    prepare_directories().await?;
     // Get Data
     get_data(Maayan2000::<()>::URL).await?;
     // TODO: parse all the data into one big json or a database and saveit and delete the files after
@@ -31,12 +28,6 @@ async fn get_data(url: &str) -> Result<(), Box<dyn Error>> {
             println!("Unsupported URL: {}", url);
         }
     }
-
-    Ok(())
-}
-
-async fn prepare_directories() -> Result<(), Box<dyn Error>> {
-    Maayan2000::<()>::create_dir_all()?;
 
     Ok(())
 }

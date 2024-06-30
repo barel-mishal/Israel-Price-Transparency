@@ -4,10 +4,8 @@ use std::{error::Error, path::PathBuf};
 
 /// Sets up the headless browser with custom user data directory.
 /// Returns a `Result` with the browser instance or an error.
-pub fn setup_browser(download_dir: &str) -> Result<Browser, Box<dyn Error>> {
-    let user_data_dir = format!("{}/chrome_user_data", download_dir);
+pub fn setup_browser(user_data_dir: &str) -> Result<Browser, Box<dyn Error>> {
     let user_data_dir = PathBuf::from(user_data_dir);
-    super::create_directory::create_directory(&user_data_dir)?;
 
     let browser = Browser::new(
         LaunchOptionsBuilder::default()

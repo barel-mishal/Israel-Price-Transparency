@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-use std::{error::Error, fs::create_dir_all, path::Path};
+use std::{error::Error, fs::{create_dir_all, File}, path::Path};
 
 use serde::{Deserialize, Serialize};
 
@@ -29,34 +29,55 @@ impl FileInfo {
 }
 
 impl<T> Maayan2000<T> {
-    pub const PATH: &'static str = "data/Maayan2000";
+    pub const PATH: &'static str = "/data/Maayan2000";
+    pub const PATH_CHROME_USER_DATA: &'static str = "/data/Maayan2000/chrome_user_data";
+
     pub const URL: &'static str = "https://maayan2000.binaprojects.com/Main.aspx";
 
-    pub fn create_dir_all() -> Result<(), Box<dyn Error>> {
-        if !Path::new(Self::PATH).exists() {
-            create_dir_all(Self::PATH)?;
+
+    pub fn create_all_dirs() -> Result<(), Box<dyn Error>> {
+        // Check and create PATH directory
+        let path = Path::new(Self::PATH);
+        if !path.exists() {
+            create_dir_all(path)?;
         }
+    
+        // Check and create PATH_CHROME_USER_DATA directory
+        let path_chrome = Path::new(Self::PATH_CHROME_USER_DATA);
+        if !path_chrome.exists() {
+            create_dir_all(path_chrome)?;
+        }
+    
         Ok(())
     }
 
     pub async fn get_data_maayan_2000() -> Result<(), Box<dyn Error>> {
-        println!("Fetching Maayan 2000");
+        if let Err(e) = Self::create_all_dirs() {
+            println!("Failed to create directories: {}", e);
+            return Err(e);
+        }
     
+    
+        println!("Fetching Maayan 2000");
         // Set up the browser options with the custom download path
-        let browser = setup_browser(&Maayan2000::<()>::PATH)?;
+        let browser = setup_browser(&Maayan2000::<()>::PATH_CHROME_USER_DATA)?;
         let tab = browser.new_tab()?;
         tab.navigate_to(Maayan2000::<()>::URL)?;
         tab.wait_until_navigated()?;
+        let _ = tab.wait_for_element("#myTable tbody tr td");
     
         let html = tab.get_content()?;
+        println!("sdflkjsdfkljsdflkjsdklfjsdkljf\n\n{:?}", html);
         let file_infos = crate::parse_html_maayan_2000::parse_html(&html)?;
-    
+
         save_json(&file_infos, DIR_ROOT_DATA)?;
+
+        println!("File infos: {:?}", file_infos);
     
         for file_info in &file_infos {
             Self::download_and_parse_file(Maayan2000::<()>::URL, Maayan2000::<()>::PATH, file_info).await?;
         }
-    
+
         Ok(())
     }
 
@@ -80,7 +101,9 @@ impl<T> Maayan2000<T> {
     async fn parse_response_file(spath: &str, download_dir: &str, file_info: &FileInfo) -> Result<(), Box<dyn Error>> {
         let bytes = download_file_with_spath(spath).await?;
         let file_path = format!("{}/{}", download_dir, file_info.file_name);
-    
+        println!("\n\n2: File path: {}\n\n", file_path);
+
+
         if let Some(parent) = Path::new(&file_path).parent() {
             std::fs::create_dir_all(parent)?;
         }
